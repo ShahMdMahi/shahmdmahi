@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { SOCIAL_LINKS } from "@/lib/constants";
+import { sendEmail } from "@/lib/send-email";
+import { toast } from "sonner";
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -23,14 +25,17 @@ export function Contact() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Here you would typically send the form data to your backend
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", message: "" });
+    const result = await sendEmail(new FormData(e.currentTarget));
+    if (result.success) {
+      setSubmitted(true);
+      setFormData({ name: "", email: "", message: "" });
+      toast.success("Message sent successfully!");
+    } else {
+      toast.error("Failed to send message. Please try again.");
+    }
 
-    // Reset success message after 3 seconds
     setTimeout(() => setSubmitted(false), 3000);
   };
 
